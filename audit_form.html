@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coaching Operations Pre-Audit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0A0C0F;
+    --surface: #111318;
+    --surface2: #181C22;
+    --border: #1F252E;
+    --border2: #2A3140;
+    --accent: #E8A427;
+    --accent2: #1DB88E;
+    --danger: #E05252;
+    --text: #E8E6DF;
+    --muted: #6B7280;
+    --muted2: #9CA3AF;
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+    --display: 'Syne', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 48px 48px;
+    opacity: 0.4;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* ── Header ── */
+  .header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 48px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .brand {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .header-title {
+    font-family: var(--display);
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  .header-sub {
+    font-size: 14px;
+    color: var(--muted2);
+    margin-top: 6px;
+    line-height: 1.5;
+    max-width: 420px;
+  }
+
+  .step-counter {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--muted);
+    text-align: right;
+    white-space: nowrap;
+    padding-top: 4px;
+  }
+
+  .step-counter strong {
+    color: var(--accent);
+    font-size: 22px;
+    font-weight: 500;
+    display: block;
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+
+  /* ── Progress bar ── */
+  .progress-track {
+    width: 100%;
+    height: 2px;
+    background: var(--border2);
+    margin-bottom: 40px;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 2px;
+  }
+
+  /* ── Live ROI ticker ── */
+  .roi-ticker {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-left: 3px solid var(--danger);
+    border-radius: 8px;
+    padding: 14px 20px;
+    margin-bottom: 36px;
+    transition: all 0.4s ease;
+  }
+
+  .roi-ticker.positive {
+    border-left-color: var(--accent2);
+  }
+
+  .roi-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  .roi-value {
+    font-family: var(--mono);
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--danger);
+    transition: color 0.3s, transform 0.2s;
+    min-width: 120px;
+  }
+
+  .roi-ticker.positive .roi-value { color: var(--accent2); }
+
+  .roi-desc {
+    font-size: 12px;
+    color: var(--muted2);
+    line-height: 1.4;
+  }
+
+  /* ── Section ── */
+  .section { display: none; animation: fadeIn 0.35s ease; }
+  .section.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .section-tag::before {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .section-title {
+    font-family: var(--display);
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+  }
+
+  .section-desc {
+    font-size: 13px;
+    color: var(--muted2);
+    margin-bottom: 28px;
+    line-height: 1.5;
+  }
+
+  /* ── Field ── */
+  .field { margin-bottom: 24px; }
+
+  .field-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted2);
+    margin-bottom: 8px;
+    letter-spacing: 0.01em;
+  }
+
+  .field-hint {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  input[type="number"],
+  input[type="text"],
+  select {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-family: var(--mono);
+    font-size: 16px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  input[type="number"]:focus,
+  input[type="text"]:focus,
+  select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(232,164,39,0.12);
+  }
+
+  input[type="number"]::placeholder { color: var(--muted); }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    cursor: pointer;
+  }
+
+  select option { background: #1a1e26; }
+
+  /* ── Radio cards ── */
+  .radio-grid {
+    display: grid;
+    gap: 8px;
+  }
+
+  .radio-grid.cols2 { grid-template-columns: 1fr 1fr; }
+
+  .radio-card {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .radio-card input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .radio-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--muted2);
+    transition: all 0.18s ease;
+    line-height: 1.4;
+  }
+
+  .radio-label::before {
+    content: '';
+    display: block;
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid var(--border2);
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: all 0.18s;
+  }
+
+  .radio-card input:checked + .radio-label {
+    border-color: var(--accent);
+    background: rgba(232, 164, 39, 0.07);
+    color: var(--text);
+  }
+
+  .radio-card input:checked + .radio-label::before {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: inset 0 0 0 3px var(--surface);
+  }
+
+  /* ── Checkbox cards ── */
+  .check-card {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .check-card input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .check-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--muted2);
+    transition: all 0.18s ease;
+    line-height: 1.4;
+  }
+
+  .check-label::before {
+    content: '';
+    display: block;
+    min-width: 14px;
+    height: 14px;
+    border: 1.5px solid var(--border2);
+    border-radius: 3px;
+    margin-top: 1px;
+    transition: all 0.18s;
+    background-image: none;
+  }
+
+  .check-card input:checked + .check-label {
+    border-color: var(--accent2);
+    background: rgba(29, 184, 142, 0.07);
+    color: var(--text);
+  }
+
+  .check-card input:checked + .check-label::before {
+    background: var(--accent2);
+    border-color: var(--accent2);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='8' viewBox='0 0 10 8'%3E%3Cpath d='M1 4l3 3 5-6' stroke='%230A0C0F' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  /* ── Leak flag ── */
+  .leak-flag {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: rgba(224, 82, 82, 0.08);
+    border: 1px solid rgba(224, 82, 82, 0.25);
+    border-radius: 6px;
+    font-size: 12px;
+    color: #F87171;
+    animation: flagIn 0.25s ease;
+  }
+
+  .leak-flag.show { display: flex; }
+  .leak-flag.warn { background: rgba(232,164,39,0.08); border-color: rgba(232,164,39,0.25); color: var(--accent); }
+
+  @keyframes flagIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .flag-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+
+  /* ── Two-col inputs ── */
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  /* ── Buttons ── */
+  .btn-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 36px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    border-radius: 8px;
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.18s ease;
+    letter-spacing: 0.01em;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #0A0C0F;
+  }
+
+  .btn-primary:hover {
+    background: #F0B535;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(232,164,39,0.25);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted2);
+    border: 1px solid var(--border2);
+  }
+
+  .btn-ghost:hover {
+    color: var(--text);
+    border-color: var(--muted);
+  }
+
+  .btn svg { transition: transform 0.18s; }
+  .btn-primary:hover svg { transform: translateX(3px); }
+
+  /* ── Results ── */
+  #results { display: none; }
+  #results.active { display: block; }
+
+  .results-header {
+    text-align: center;
+    padding: 48px 0 40px;
+  }
+
+  .results-badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid rgba(232,164,39,0.3);
+    border-radius: 20px;
+    padding: 4px 14px;
+    margin-bottom: 20px;
+  }
+
+  .results-title {
+    font-family: var(--display);
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 10px;
+  }
+
+  .results-sub {
+    color: var(--muted2);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .metric-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 32px 0;
+  }
+
+  .metric-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 20px;
+  }
+
+  .metric-card.danger { border-top: 2px solid var(--danger); }
+  .metric-card.warn   { border-top: 2px solid var(--accent); }
+  .metric-card.ok     { border-top: 2px solid var(--accent2); }
+
+  .metric-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .metric-val {
+    font-family: var(--mono);
+    font-size: 28px;
+    font-weight: 500;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .metric-card.danger .metric-val { color: var(--danger); }
+  .metric-card.warn   .metric-val { color: var(--accent); }
+  .metric-card.ok     .metric-val { color: var(--accent2); }
+
+  .metric-sub { font-size: 11px; color: var(--muted); line-height: 1.4; }
+
+  /* Bottleneck result */
+  .bottleneck-section {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+
+  .bottleneck-title {
+    font-family: var(--display);
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .pill {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+
+  .pill.critical { background: rgba(224,82,82,0.15); color: var(--danger); }
+  .pill.moderate { background: rgba(232,164,39,0.15); color: var(--accent); }
+  .pill.ok       { background: rgba(29,184,142,0.15); color: var(--accent2); }
+
+  .finding-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .finding-row:last-child { border-bottom: none; padding-bottom: 0; }
+
+  .finding-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .finding-icon.red { background: rgba(224,82,82,0.2); color: var(--danger); }
+  .finding-icon.amber { background: rgba(232,164,39,0.2); color: var(--accent); }
+  .finding-icon.green { background: rgba(29,184,142,0.2); color: var(--accent2); }
+
+  .finding-text { color: var(--muted2); }
+  .finding-text strong { color: var(--text); }
+
+  .cta-box {
+    background: linear-gradient(135deg, rgba(232,164,39,0.08), rgba(29,184,142,0.05));
+    border: 1px solid rgba(232,164,39,0.2);
+    border-radius: 12px;
+    padding: 32px;
+    text-align: center;
+    margin-top: 32px;
+  }
+
+  .cta-title {
+    font-family: var(--display);
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .cta-desc {
+    font-size: 13px;
+    color: var(--muted2);
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border2);
+    margin: 32px 0;
+  }
+
+  @media (max-width: 600px) {
+    .metric-grid { grid-template-columns: 1fr; }
+    .field-row { grid-template-columns: 1fr; }
+    .radio-grid.cols2 { grid-template-columns: 1fr; }
+    .header { flex-direction: column; gap: 16px; }
+    .step-counter { text-align: left; }
+    .results-title { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div>
+      <div class="brand">Business Operations Audit</div>
+      <div class="header-title">Coaching Efficiency<br>Health Check</div>
+      <div class="header-sub">Takes 4 minutes. Surfaces the exact leaks costing you clients before we speak.</div>
+    </div>
+    <div class="step-counter">
+      <strong id="step-num">1</strong>
+      <span>of 4 parts</span>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-track">
+    <div class="progress-fill" id="progress" style="width:25%"></div>
+  </div>
+
+  <!-- Live ROI ticker -->
+  <div class="roi-ticker" id="roi-ticker">
+    <div class="roi-label">Estimated<br>monthly leak</div>
+    <div class="roi-value" id="roi-val">$0</div>
+    <div class="roi-desc" id="roi-desc">Fill in your numbers and watch this update in real time.</div>
+  </div>
+
+  <!-- ─── PART 1 ─── -->
+  <div class="section active" id="section-1">
+    <div class="section-tag">Part 01</div>
+    <div class="section-title">Top of funnel — marketing & inquiries</div>
+    <div class="section-desc">Let's establish your baseline traffic and lead volume. Most coaches discover their marketing is actually working — the problem lives downstream.</div>
+
+    <div class="field-row">
+      <div class="field">
+        <div class="field-label">
+          Monthly website / profile visitors
+          <span class="field-hint">estimate ok</span>
+        </div>
+        <input type="number" id="visitors" placeholder="e.g. 1000" oninput="calc()">
+      </div>
+      <div class="field">
+        <div class="field-label">
+          Monthly inquiries (leads)
+          <span class="field-hint">all channels</span>
+        </div>
+        <input type="number" id="inquiries" placeholder="e.g. 40" oninput="calc()">
+      </div>
+    </div>
+
+    <div class="field" id="inquiry-rate-field" style="display:none">
+      <div class="field-label">Your inquiry rate</div>
+      <div style="font-family:var(--mono);font-size:22px;color:var(--accent2)" id="inquiry-rate-display">—</div>
+      <div id="inquiry-rate-flag" class="leak-flag warn" style="margin-top:8px">
+        <span class="flag-dot"></span>
+        <span id="inquiry-rate-msg"></span>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">How do people currently inquire?</div>
+      <div class="radio-grid cols2" style="gap:8px">
+        <label class="radio-card"><input type="radio" name="inquiry-method" value="form"><span class="radio-label">Contact / intake form</span></label>
+        <label class="radio-card"><input type="radio" name="inquiry-method" value="email"><span class="radio-label">Direct email</span></label>
+        <label class="radio-card"><input type="radio" name="inquiry-method" value="dm"><span class="radio-label">Social DM (Instagram / LinkedIn)</span></label>
+        <label class="radio-card"><input type="radio" name="inquiry-method" value="phone"><span class="radio-label">Phone / text / referral</span></label>
+      </div>
+      <div id="dm-flag" class="leak-flag" style="margin-top:8px">
+        <span class="flag-dot"></span>
+        High-priority lead capture leak. DMs are untracked and unautomatable — leads fall through the cracks.
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="next(2)">
+        Continue to sales process
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ─── PART 2 ─── -->
+  <div class="section" id="section-2">
+    <div class="section-tag">Part 02</div>
+    <div class="section-title">Middle of funnel — sales process</div>
+    <div class="section-desc">This is where most coaches lose revenue without realising it. Every no-show and slow close is a calculable leak.</div>
+
+    <div class="field-row">
+      <div class="field">
+        <div class="field-label">Discovery calls last month</div>
+        <input type="number" id="calls" placeholder="e.g. 20" oninput="calc()">
+      </div>
+      <div class="field">
+        <div class="field-label">No-shows last month</div>
+        <input type="number" id="noshows" placeholder="e.g. 5" oninput="calc()">
+      </div>
+    </div>
+    <div id="noshow-flag" class="leak-flag">
+      <span class="flag-dot"></span>
+      <span id="noshow-msg"></span>
+    </div>
+
+    <div class="field-row" style="margin-top:20px">
+      <div class="field">
+        <div class="field-label">New paying clients last month</div>
+        <input type="number" id="new-clients" placeholder="e.g. 4" oninput="calc()">
+      </div>
+      <div class="field">
+        <div class="field-label">Average program value ($)</div>
+        <input type="number" id="program-value" placeholder="e.g. 3000" oninput="calc()">
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">Discovery-to-paid timeframe</div>
+      <div class="radio-grid" onchange="onCloseSpeed()">
+        <label class="radio-card"><input type="radio" name="close-speed" value="same"><span class="radio-label">Same day — payment collected on the call</span></label>
+        <label class="radio-card"><input type="radio" name="close-speed" value="week"><span class="radio-label">2–7 days</span></label>
+        <label class="radio-card"><input type="radio" name="close-speed" value="month"><span class="radio-label">1–4 weeks</span></label>
+        <label class="radio-card"><input type="radio" name="close-speed" value="varies"><span class="radio-label">It varies wildly — no consistent process</span></label>
+      </div>
+      <div id="slow-close-flag" class="leak-flag">
+        <span class="flag-dot"></span>
+        <span id="slow-close-msg"></span>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="next(1)">Back</button>
+      <button class="btn btn-primary" onclick="next(3)">
+        Continue to operations
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ─── PART 3 ─── -->
+  <div class="section" id="section-3">
+    <div class="section-tag">Part 03</div>
+    <div class="section-title">Admin drain — operations</div>
+    <div class="section-desc">Coaches consistently underestimate how much non-coaching work is eating their capacity — and therefore their revenue ceiling.</div>
+
+    <div class="field-row">
+      <div class="field">
+        <div class="field-label">
+          Admin hours per week
+          <span class="field-hint">scheduling, invoicing, emails</span>
+        </div>
+        <input type="number" id="admin-hours" placeholder="e.g. 8" oninput="calc()">
+      </div>
+      <div class="field">
+        <div class="field-label">
+          Your effective hourly rate ($)
+          <span class="field-hint">program value ÷ delivery hours</span>
+        </div>
+        <input type="number" id="hourly-rate" placeholder="e.g. 200" oninput="calc()">
+      </div>
+    </div>
+
+    <div id="admin-flag" class="leak-flag">
+      <span class="flag-dot"></span>
+      <span id="admin-msg"></span>
+    </div>
+
+    <div class="field" style="margin-top:20px">
+      <div class="field-label">When a client pays, what happens next?</div>
+      <div class="radio-grid" onchange="onOnboarding()">
+        <label class="radio-card"><input type="radio" name="onboarding" value="auto"><span class="radio-label">An automated system handles it instantly — contract, welcome, kickoff booking fires automatically</span></label>
+        <label class="radio-card"><input type="radio" name="onboarding" value="assistant"><span class="radio-label">My assistant handles it within 24 hours</span></label>
+        <label class="radio-card"><input type="radio" name="onboarding" value="manual"><span class="radio-label">I manually send a welcome email and PDF — usually same day or next day</span></label>
+      </div>
+      <div id="onboarding-flag" class="leak-flag">
+        <span class="flag-dot"></span>
+        <span id="onboarding-msg"></span>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="next(2)">Back</button>
+      <button class="btn btn-primary" onclick="next(4)">
+        Final section — stress test
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ─── PART 4 ─── -->
+  <div class="section" id="section-4">
+    <div class="section-tag">Part 04</div>
+    <div class="section-title">Stress test</div>
+    <div class="section-desc">The final two questions identify your failure mode under growth and the symptom you feel most. This determines where we focus first.</div>
+
+    <div class="field">
+      <div class="field-label">If your lead volume tripled tomorrow, what breaks first?</div>
+      <div class="radio-grid">
+        <label class="radio-card"><input type="radio" name="break-point" value="inbox" onchange="calc()"><span class="radio-label">"My inbox would explode" — no system to handle volume of messages</span></label>
+        <label class="radio-card"><input type="radio" name="break-point" value="prep" onchange="calc()"><span class="radio-label">"I'd have no time to prep for sessions" — delivery capacity would collapse</span></label>
+        <label class="radio-card"><input type="radio" name="break-point" value="tracking" onchange="calc()"><span class="radio-label">"I'd lose track of who paid and who didn't" — no CRM or payment tracking</span></label>
+        <label class="radio-card"><input type="radio" name="break-point" value="everything" onchange="calc()"><span class="radio-label">"Everything would break" — I'm already at capacity</span></label>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:8px">
+      <div class="field-label">Which bottleneck symptoms do you feel most? <span class="field-hint">select all that apply</span></div>
+      <div class="radio-grid" style="gap:8px">
+        <label class="check-card"><input type="checkbox" name="symptom" value="busy"><span class="check-label">"I'm busy all day but my bank account doesn't show it."</span></label>
+        <label class="check-card"><input type="checkbox" name="symptom" value="scheduling"><span class="check-label">"I hate the back-and-forth of scheduling."</span></label>
+        <label class="check-card"><input type="checkbox" name="symptom" value="qualifying"><span class="check-label">"I spend too much time talking to people who can't afford me."</span></label>
+        <label class="check-card"><input type="checkbox" name="symptom" value="admin-fear"><span class="check-label">"I'm afraid of my own success because I can't handle more admin."</span></label>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="next(3)">Back</button>
+      <button class="btn btn-primary" onclick="showResults()">
+        View my audit results
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ─── RESULTS ─── -->
+  <div id="results">
+    <div class="results-header">
+      <div class="results-badge">Audit complete</div>
+      <div class="results-title" id="results-headline">Your pipeline has 3 active leaks.</div>
+      <div class="results-sub" id="results-subline">Based on your numbers, here is where your workflow is losing revenue right now.</div>
+    </div>
+
+    <div class="metric-grid" id="metric-grid">
+      <!-- populated by JS -->
+    </div>
+
+    <div class="bottleneck-section" id="primary-bottleneck">
+      <!-- populated by JS -->
+    </div>
+
+    <div class="bottleneck-section" id="findings-section">
+      <!-- populated by JS -->
+    </div>
+
+    <div class="cta-box">
+      <div class="cta-title">Ready to close these leaks?</div>
+      <div class="cta-desc">In a 25-minute diagnostic call, I'll walk you through exactly which constraint to fix first, what the implementation looks like for your specific setup, and what it will cost versus what it recovers.</div>
+      <button class="btn btn-primary" style="margin:0 auto">
+        Book the diagnostic call
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let state = {
+  visitors: 0, inquiries: 0, calls: 0, noshows: 0,
+  newClients: 0, programValue: 0, adminHours: 0, hourlyRate: 0,
+  closeSpeed: '', onboarding: '', breakPoint: '', inquiryMethod: ''
+};
+
+function v(id) { return parseFloat(document.getElementById(id)?.value) || 0; }
+function sel(name) { return document.querySelector(`input[name="${name}"]:checked`)?.value || ''; }
+
+function calc() {
+  state.visitors     = v('visitors');
+  state.inquiries    = v('inquiries');
+  state.calls        = v('calls');
+  state.noshows      = v('noshows');
+  state.newClients   = v('new-clients');
+  state.programValue = v('program-value');
+  state.adminHours   = v('admin-hours');
+  state.hourlyRate   = v('hourly-rate');
+  state.closeSpeed   = sel('close-speed');
+  state.onboarding   = sel('onboarding');
+  state.breakPoint   = sel('break-point');
+
+  // Inquiry rate
+  const irField = document.getElementById('inquiry-rate-field');
+  const irDisplay = document.getElementById('inquiry-rate-display');
+  const irFlag = document.getElementById('inquiry-rate-flag');
+  const irMsg = document.getElementById('inquiry-rate-msg');
+  if (state.visitors > 0 && state.inquiries > 0) {
+    irField.style.display = 'block';
+    const rate = (state.inquiries / state.visitors * 100).toFixed(1);
+    irDisplay.textContent = rate + '%';
+    if (rate < 2) {
+      irFlag.className = 'leak-flag show';
+      irMsg.textContent = rate + '% is below the 3–5% benchmark. Top-of-funnel needs attention before pipeline fixes will matter.';
+    } else if (rate >= 3) {
+      irFlag.className = 'leak-flag warn show';
+      irMsg.textContent = rate + '% inquiry rate — solid. Your marketing is working. The leak is downstream.';
+    } else {
+      irFlag.className = 'leak-flag show';
+      irMsg.textContent = rate + '% is approaching benchmark. Downstream leaks are likely the bigger priority.';
+    }
+  } else {
+    irField.style.display = 'none';
+  }
+
+  // No-show flag
+  const nsFlag = document.getElementById('noshow-flag');
+  const nsMsg = document.getElementById('noshow-msg');
+  if (state.calls > 0 && state.noshows > 0) {
+    const nsRate = (state.noshows / state.calls * 100).toFixed(0);
+    const nsLeak = state.noshows * (state.programValue || 2000) * (state.newClients > 0 ? state.newClients / Math.max(state.calls - state.noshows, 1) : 0.4);
+    if (nsRate >= 25) {
+      nsFlag.className = 'leak-flag show';
+      nsMsg.textContent = nsRate + '% no-show rate — critical. Industry benchmark is below 15%. This is Gate 1 (Scheduling) flagged as your primary constraint.';
+    } else if (nsRate >= 15) {
+      nsFlag.className = 'leak-flag warn show';
+      nsMsg.textContent = nsRate + '% no-show rate — above benchmark. Automated reminders and re-engagement sequences would recover a portion of this.';
+    } else {
+      nsFlag.className = 'leak-flag';
+    }
+  } else {
+    nsFlag.className = 'leak-flag';
+  }
+
+  // Onboarding flag
+  onOnboarding();
+  onCloseSpeed();
+
+  // Admin flag
+  const adminFlag = document.getElementById('admin-flag');
+  const adminMsg = document.getElementById('admin-msg');
+  if (state.adminHours > 0 && state.hourlyRate > 0) {
+    const adminCost = state.adminHours * state.hourlyRate * 4.3;
+    if (state.adminHours >= 10) {
+      adminFlag.className = 'leak-flag show';
+      adminMsg.textContent = `${state.adminHours} hrs/week of admin = ~$${Math.round(adminCost).toLocaleString()}/month in billable time being spent on non-coaching tasks. Critical capacity drain.`;
+    } else if (state.adminHours >= 5) {
+      adminFlag.className = 'leak-flag warn show';
+      adminMsg.textContent = `${state.adminHours} hrs/week of admin = ~$${Math.round(adminCost).toLocaleString()}/month in recoverable capacity. Automation could reclaim 60–80% of this.`;
+    } else {
+      adminFlag.className = 'leak-flag';
+    }
+  } else {
+    adminFlag.className = 'leak-flag';
+  }
+
+  // ROI calculation
+  let totalLeak = 0;
+  let leakDesc = '';
+  const pv = state.programValue || 2500;
+  const cr = state.calls > 0 ? state.newClients / Math.max(state.calls - state.noshows, 1) : 0.45;
+
+  // No-show leak
+  const nsLeak = state.noshows * pv * cr;
+  totalLeak += nsLeak;
+
+  // Admin leak
+  const adminLeak = state.adminHours * (state.hourlyRate || 150) * 4.3;
+  totalLeak += adminLeak;
+
+  // Close speed leak (ghost risk)
+  if (state.closeSpeed === 'month') totalLeak += pv * (state.newClients || 2) * 0.3;
+  else if (state.closeSpeed === 'varies') totalLeak += pv * (state.newClients || 2) * 0.2;
+
+  const ticker = document.getElementById('roi-ticker');
+  const roiVal = document.getElementById('roi-val');
+  const roiDesc = document.getElementById('roi-desc');
+
+  if (totalLeak > 0) {
+    roiVal.textContent = '$' + Math.round(totalLeak).toLocaleString();
+    ticker.className = totalLeak > 2000 ? 'roi-ticker' : 'roi-ticker positive';
+    roiDesc.textContent = totalLeak > 5000
+      ? 'Estimated monthly revenue at risk from identified bottlenecks. This will be refined on the diagnostic call.'
+      : 'Estimated monthly opportunity cost from current operational gaps.';
+  } else {
+    roiVal.textContent = '$0';
+    ticker.className = 'roi-ticker positive';
+    roiDesc.textContent = 'Fill in your numbers to see your live leak estimate.';
+  }
+}
+
+function onOnboarding() {
+  const val = sel('onboarding');
+  const flag = document.getElementById('onboarding-flag');
+  const msg = document.getElementById('onboarding-msg');
+  if (val === 'manual') {
+    flag.className = 'leak-flag show';
+    msg.textContent = 'High-priority efficiency leak. Manual onboarding creates a 12–48 hour cooling-off window in which signed clients ghost. This is Gate 3 (Onboarding) as your constraint.';
+  } else if (val === 'assistant') {
+    flag.className = 'leak-flag warn show';
+    msg.textContent = 'Human dependency exists. Assistants add latency and single points of failure. Automation would remove the dependency entirely.';
+  } else {
+    flag.className = 'leak-flag';
+  }
+  calc();
+}
+
+function onCloseSpeed() {
+  const val = sel('close-speed');
+  const flag = document.getElementById('slow-close-flag');
+  const msg = document.getElementById('slow-close-msg');
+  if (val === 'month') {
+    flag.className = 'leak-flag show';
+    msg.textContent = 'A 1–4 week close window is a major ghost-risk zone. The warmth of a verbal yes depreciates daily. This signals Gate 3 (Onboarding) as a bottleneck.';
+  } else if (val === 'varies') {
+    flag.className = 'leak-flag show';
+    msg.textContent = '"Varies wildly" means there is no system — only habits. Inconsistent close speed is the #1 predictor of onboarding ghosting.';
+  } else if (val === 'week') {
+    flag.className = 'leak-flag warn show';
+    msg.textContent = '2–7 days is improvable. With automated contract + payment sequences, same-session close is achievable for most programs.';
+  } else {
+    flag.className = 'leak-flag';
+  }
+}
+
+// DM method flag
+document.querySelectorAll('input[name="inquiry-method"]').forEach(el => {
+  el.addEventListener('change', () => {
+    const dmFlag = document.getElementById('dm-flag');
+    dmFlag.className = el.value === 'dm' ? 'leak-flag show' : 'leak-flag';
+  });
+});
+
+function next(step) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(`section-${step}`)?.classList.add('active');
+  document.getElementById('step-num').textContent = step;
+  document.getElementById('progress').style.width = (step * 25) + '%';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showResults() {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('results').style.display = 'block';
+  document.getElementById('progress').style.width = '100%';
+
+  const pv = state.programValue || 2500;
+  const cr = state.calls > 0 ? state.newClients / Math.max(state.calls - state.noshows, 1) : 0.45;
+  const nsLeak = Math.round(state.noshows * pv * cr);
+  const adminLeak = Math.round(state.adminHours * (state.hourlyRate || 150) * 4.3);
+  let closeLeak = 0;
+  if (state.closeSpeed === 'month') closeLeak = Math.round(pv * (state.newClients || 2) * 0.3);
+  else if (state.closeSpeed === 'varies') closeLeak = Math.round(pv * (state.newClients || 2) * 0.2);
+  const total = nsLeak + adminLeak + closeLeak;
+
+  // Count active leaks
+  let leakCount = 0;
+  if (nsLeak > 0) leakCount++;
+  if (adminLeak > 500) leakCount++;
+  if (closeLeak > 0) leakCount++;
+
+  document.getElementById('results-headline').textContent =
+    `Your pipeline has ${leakCount || 1} active leak${leakCount !== 1 ? 's' : ''}.`;
+  document.getElementById('results-subline').textContent =
+    `Based on your numbers, we estimate $${total.toLocaleString()}/month in recoverable revenue. Here is exactly where the workflow is losing it.`;
+
+  // Metric cards
+  const nsRate = state.calls > 0 ? Math.round(state.noshows / state.calls * 100) : 0;
+  const closeRate = (state.calls - state.noshows) > 0 ? Math.round(state.newClients / (state.calls - state.noshows) * 100) : 0;
+  document.getElementById('metric-grid').innerHTML = `
+    <div class="metric-card ${nsRate >= 20 ? 'danger' : nsRate >= 10 ? 'warn' : 'ok'}">
+      <div class="metric-label">No-show rate</div>
+      <div class="metric-val">${nsRate}%</div>
+      <div class="metric-sub">Benchmark: &lt;15%${nsRate >= 15 ? ' — above threshold' : ' — within range'}</div>
+    </div>
+    <div class="metric-card ${adminLeak > 3000 ? 'danger' : adminLeak > 1000 ? 'warn' : 'ok'}">
+      <div class="metric-label">Admin cost / mo</div>
+      <div class="metric-val">$${adminLeak.toLocaleString()}</div>
+      <div class="metric-sub">${state.adminHours} hrs/wk × $${state.hourlyRate || 150}/hr × 4.3 wks</div>
+    </div>
+    <div class="metric-card ${closeRate < 40 ? 'danger' : closeRate < 55 ? 'warn' : 'ok'}">
+      <div class="metric-label">Call close rate</div>
+      <div class="metric-val">${closeRate}%</div>
+      <div class="metric-sub">Benchmark: 50–65%${closeRate < 50 ? ' — below benchmark' : ' — within range'}</div>
+    </div>
+  `;
+
+  // Primary bottleneck
+  let primaryGate = '', gateClass = '', gateDesc = '', tool = '';
+  const symptoms = Array.from(document.querySelectorAll('input[name="symptom"]:checked')).map(e => e.value);
+  if (nsRate >= 20 || symptoms.includes('scheduling')) {
+    primaryGate = 'Gate 1 — Scheduling'; gateClass = 'critical';
+    gateDesc = 'Your no-show rate and/or scheduling symptoms indicate that inquiry leads are leaking before they ever reach a discovery call. Automating booking, reminders, and no-show re-engagement is the highest-leverage first fix.';
+    tool = 'Calendly + Zapier automated reminder + re-engagement sequence';
+  } else if (symptoms.includes('qualifying') || (state.calls > 0 && closeRate < 40)) {
+    primaryGate = 'Gate 2 — Qualification'; gateClass = 'moderate';
+    gateDesc = 'Your close rate and/or symptoms suggest you are spending discovery call time on leads who are not a fit. A pre-call Typeform application with conditional booking logic will filter unqualified leads before they reach your calendar.';
+    tool = 'Typeform pre-qualifier + Calendly conditional booking';
+  } else if (state.closeSpeed === 'month' || state.closeSpeed === 'varies' || state.onboarding === 'manual') {
+    primaryGate = 'Gate 3 — Onboarding'; gateClass = 'danger';
+    gateDesc = 'Your close-to-payment window and/or manual onboarding process is creating a ghost-risk zone after verbal yes. Automating contract delivery, payment collection, and welcome sequence will eliminate the cooling-off window entirely.';
+    tool = 'Stripe + DocuSign + Zapier post-yes automation';
+  } else {
+    primaryGate = 'Gate 2 — Qualification'; gateClass = 'moderate';
+    gateDesc = 'Based on your current data, the qualification stage is the most likely constraint. We will confirm this and prioritise on the diagnostic call.';
+    tool = 'Typeform pre-qualifier + Calendly conditional booking';
+  }
+
+  document.getElementById('primary-bottleneck').innerHTML = `
+    <div class="bottleneck-title">
+      Primary constraint identified
+      <span class="pill ${gateClass}">${gateClass.toUpperCase()}</span>
+    </div>
+    <div style="font-family:var(--display);font-size:18px;font-weight:700;margin-bottom:10px;color:var(--text)">${primaryGate}</div>
+    <div style="font-size:13px;color:var(--muted2);line-height:1.6;margin-bottom:16px">${gateDesc}</div>
+    <div style="font-family:var(--mono);font-size:12px;color:var(--accent);border-top:1px solid var(--border2);padding-top:12px">
+      Recommended fix: ${tool}
+    </div>
+  `;
+
+  // Findings
+  const findings = [];
+  if (nsLeak > 0) findings.push(['red', '!', `<strong>Scheduling leak:</strong> ~$${nsLeak.toLocaleString()}/month from ${state.noshows} unrecovered no-shows at a ${Math.round(cr*100)}% close rate.`]);
+  if (adminLeak > 500) findings.push(['amber', '~', `<strong>Admin drain:</strong> ~$${adminLeak.toLocaleString()}/month in billable capacity spent on non-coaching tasks. 60–80% automatable.`]);
+  if (closeLeak > 0) findings.push(['red', '!', `<strong>Onboarding ghost risk:</strong> ~$${closeLeak.toLocaleString()}/month at risk from slow close window and manual handoff.`]);
+  if (state.inquiries > 0 && state.calls < state.inquiries * 0.6) findings.push(['amber', '~', `<strong>Lead response gap:</strong> Only ${Math.round(state.calls/state.inquiries*100)}% of inquiries are reaching a discovery call. Lead capture or response speed may be leaking.`]);
+  if (symptoms.includes('qualifying')) findings.push(['amber', '~', '<strong>Qualification absence:</strong> You reported spending time on prospects who cannot afford you. A pre-call application would reclaim this time.']);
+  if (findings.length === 0) findings.push(['green', '✓', '<strong>No critical leaks detected</strong> from the data provided. The diagnostic call will surface any hidden constraints.']);
+
+  document.getElementById('findings-section').innerHTML = `
+    <div class="bottleneck-title">All findings <span class="pill moderate">${findings.length} identified</span></div>
+    ${findings.map(([cls, icon, text]) => `
+      <div class="finding-row">
+        <div class="finding-icon ${cls}">${icon}</div>
+        <div class="finding-text">${text}</div>
+      </div>
+    `).join('')}
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border2);font-family:var(--mono);font-size:12px;color:var(--accent)">
+      Total estimated monthly leak: $${total.toLocaleString()}
+    </div>
+  `;
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
